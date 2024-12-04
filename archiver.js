@@ -29,19 +29,8 @@ function generateOutputStructure(document) {
  * @returns {Promise<void>}
  */
 async function saveFileWithStructure(structure, file) {
-    let nextPath = '';
-    for (let i = 0; i < structure.length - 1; ++i) {
-        nextPath = path.join(nextPath, structure[i]);
-        try {
-            const stat = await fs.stat(nextPath);
-            if (!stat.isDirectory()) {
-                throw new Error(`${nextPath} exists, but is not a directory.`);
-            }
-        } catch (error) {
-            // Folder does not exist. We need to create it.
-            await fs.mkdir(nextPath, { recursive: false });
-        }
-    }
+    const folders = path.join(...structure.slice(0, structure.length - 1));
+    await fs.mkdir(folders, { recursive: true });
 
     return fs.writeFile(path.join(...structure), file);
 }
