@@ -17,10 +17,14 @@ In case of failure, the script will not lose progress and resume where it left o
 
 ## Usage
 Using npx (without installation):
-`npx github:DePaper/IveskArchiver <apikey> <outputpath>`
+```bash
+npx github:DePaper/IveskArchiver <apikey> <outputpath>
+```
 
 Using as node script:
-`node archiver.js <apikey> <outputpath>`  
+```bash
+node archiver.js <apikey> <outputpath>
+```
 
 * `apikey` - API key to Ivesk.lt
 * `outputpath` - folder where the files should be downloaded
