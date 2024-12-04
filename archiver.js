@@ -1,6 +1,5 @@
 const fs = require('fs').promises;
 const path = require('path');
-const config = require('./config');
 
 async function fetchFile(url, outputPath) {
     const resp = await fetch(url, { method: 'GET' });
@@ -17,16 +16,34 @@ async function getLastPageFile(filename) {
     }
 }
 
-async function main() {
-    if (!config.apikey) { throw new Error('"config.apikey" is required'); }
-    if (!config.outputpath) { throw new Error('"config.outputpath" is required'); }
+function printUsage() {
+    console.log('Usage: node archiver.js <apikey> <outputpath>');
+}
 
-    const lastPageFileName = `${config.apikey.substring(0, 36)}.json`;
-    const lastPageFile = await getLastPageFile(path.join(config.outputpath, lastPageFileName));
+async function main() {
+    const args = process.argv.slice(2);
+    const apikey = args[0];
+    const outputpath = args[1];
+
+    if (!apikey) {
+        console.error('"apiKey" is required.');
+        printUsage();
+        return;
+    }
+
+    if (!outputpath) {
+        console.error('"outputPath" is required.');
+        printUsage();
+        return;
+    }
+
+    const lastPageFileName = `${apikey.substring(0, 36)}.json`;
+    const lastPageFilePath = path.join(outputpath, lastPageFileName);
+    const lastPageFile = await getLastPageFile(lastPageFilePath);
 
     const options = {
         method: 'GET',
-        headers: { 'x-api-key': config.apikey },
+        headers: { 'x-api-key': apikey },
     };
 
     const url = new URL('https://stagingapp.ivesk.lt/api/pub/digitized');
@@ -40,11 +57,11 @@ async function main() {
         const resp = await fetch(url, options);
         data = await resp.json();
 
-        const promises = data.documents.map(doc => fetchFile(doc.url, path.join(config.outputpath, doc.id)));
+        const promises = data.documents.map(doc => fetchFile(doc.url, path.join(outputpath, doc.id)));
         await Promise.all(promises);
 
         if (data.next) {
-            await fs.writeFile(path.join(config.outputpath, lastPageFileName), JSON.stringify({ next: data.next }));
+            await fs.writeFile(lastPageFilePath, JSON.stringify({ next: data.next }));
         }
 
         ++page;
