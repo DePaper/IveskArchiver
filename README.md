@@ -21,7 +21,7 @@ Using npx (without installation):
 npx github:DePaper/IveskArchiver <apikey> <outputpath>
 ```
 
-Using as node script:
+Using as Node.js script:
 ```bash
 node archiver.js <apikey> <outputpath>
 ```
