@@ -98,7 +98,7 @@ async function main() {
         }
 
         // Not running this in parallel because there might be race conditions with mkdir. Running sequentially avoids that and it stil works pretty fast.
-        const invoices = data.documents.filter(doc => doc.doctype === 'invoice');
+        const invoices = data.documents .filter(doc => doc.doctype === 'invoice' && (doc.sellerisfavorite || doc.buyerisfavorite));
         for (const invoice of invoices) {
             await fetchFile(invoice, outputpath);
         }
