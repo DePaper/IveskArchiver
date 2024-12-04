@@ -3,24 +3,32 @@ const path = require('path');
 
 const API_URL = 'https://app.ivesk.lt/api/pub/digitized';
 
+function generatePath(outputpath, operation, myname, othername, date, docnum, id) {
+    return [
+        outputpath,
+        'Ivesk.lt',
+        myname,
+        date.substring(0, 7),
+        operation,
+        `${date} ${docnum.replace(/\s/g, '').replace(/[<>:"?/\\|*]/g, '_')} ${othername} ${id}.pdf`,
+    ];
+}
+
 /**
  * @param {object} document 
  * @returns {string[]}
  */
 function generateOutputStructure(document, outputpath) {
-    // Might not work correcly if both companies are favorite.
-    const myname = document.sellerisfavorite ? document.sellernameascii : document.buyernameascii; 
-    const othername = document.sellerisfavorite ? document.buyernameascii : document.sellernameascii;
-    const operation = document.sellerisfavorite ? 'Pardavimai' : 'Pirkimai';
+    const result = [];
 
-    return [
-        outputpath,
-        'Ivesk.lt',
-        myname,
-        document.date.substring(0, 7),
-        operation,
-        `${document.date} ${document.docnum.replace(/\s/g, '').replace(/[<>:"?/\\|*]/g, '_')} ${othername} ${document.id}.pdf`,
-    ];
+    if (document.sellerisfavorite) {
+        result.push(generatePath(outputpath, 'Pardavimai', document.sellernameascii, document.buyernameascii, document.date, document.docnum, document.id));
+    }
+    if (document.buyerisfavorite) {
+        result.push(generatePath(outputpath, 'Pirkimai', document.buyernameascii, document.sellernameascii, document.date, document.docnum, document.id));
+    }
+
+    return ;
 }
 
 /**
@@ -34,11 +42,13 @@ async function fetchFile(document, outputPath) {
     const file = Buffer.from(await resp.arrayBuffer());
 
     const structure = generateOutputStructure(document, outputPath);
+    for (const item of structure) {
+        console.log(`Saving ${path.join(...item)}`);
+        const folders = path.join(...item.slice(0, item.length - 1));
+        await fs.mkdir(folders, { recursive: true });
+        await fs.writeFile(path.join(...item), file);
+    }
 
-    console.log(`Saving ${path.join(...structure)}`);
-    const folders = path.join(...structure.slice(0, structure.length - 1));
-    await fs.mkdir(folders, { recursive: true });
-    return fs.writeFile(path.join(...structure), file);
 }
 
 /**
