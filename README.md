@@ -16,6 +16,10 @@ In case of failure, the script will not lose progress and resume where it left o
 * Ivesk.lt API key. You can generate it here: [https://app.ivesk.lt/settings/general](https://app.ivesk.lt/settings/general).
 
 ## Usage
-`node archiver.js <apikey> <outputpath>`
+Using node:
+`node archiver.js <apikey> <outputpath>`  
+Using npx:
+`npx github:DePaper/IveskArchiver <apikey> <outputpath>`
+
 * `apikey` - API key to Ivesk.lt
 * `outputpath` - folder where the files should be downloaded
