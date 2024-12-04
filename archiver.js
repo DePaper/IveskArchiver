@@ -24,19 +24,6 @@ function generateOutputStructure(document) {
 
 /**
  * 
- * @param {string[]} structure 
- * @param {Buffer} file 
- * @returns {Promise<void>}
- */
-async function saveFileWithStructure(structure, file) {
-    const folders = path.join(...structure.slice(0, structure.length - 1));
-    await fs.mkdir(folders, { recursive: true });
-
-    return fs.writeFile(path.join(...structure), file);
-}
-
-/**
- * 
  * @param {object} document 
  * @param {string} outputPath 
  * @returns {Promise<void>}
@@ -46,8 +33,11 @@ async function fetchFile(document, outputPath) {
     const file = Buffer.from(await resp.arrayBuffer());
 
     const structure = generateOutputStructure(document);
+
     console.log(`Saving ${path.join(...structure)}`);
-    return saveFileWithStructure([outputPath, ...structure], file);
+    const folders = path.join(...structure.slice(0, structure.length - 1));
+    await fs.mkdir(folders, { recursive: true });
+    return fs.writeFile(path.join(...structure), file);
 }
 
 /**
