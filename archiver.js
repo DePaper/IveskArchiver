@@ -37,9 +37,9 @@ async function saveFileWithStructure(structure, file) {
             if (!stat.isDirectory()) {
                 throw new Error(`${nextPath} exists, but is not a directory.`);
             }
-        } catch {
+        } catch (error) {
             // Folder does not exist. We need to create it.
-            await fs.mkdir(nextPath);
+            await fs.mkdir(nextPath, { recursive: false });
         }
     }
 
@@ -57,6 +57,7 @@ async function fetchFile(document, outputPath) {
     const file = Buffer.from(await resp.arrayBuffer());
 
     const structure = generateOutputStructure(document);
+    console.log(`Saving ${path.join(...structure)}`);
     return saveFileWithStructure([outputPath, ...structure], file);
 }
 
@@ -108,21 +109,18 @@ async function main() {
     if (lastPageFile?.next) { url.searchParams.append('from', lastPageFile.next); }
 
     let data = null;
-    let page = 1;
     do {
         const resp = await fetch(url, options);
         data = await resp.json();
-
-        console.log(`Got ${data.documents.length} documents`);
 
         if (!resp.ok) {
             throw new Error(`Error fetching page: ${data.message}`);
         }
 
-        const promises = data.documents
-            .filter(doc => doc.doctype === 'invoice')
-            .map(doc => fetchFile(doc, outputpath));
-        await Promise.all(promises);
+        const invoices = data.documents.filter(doc => doc.doctype === 'invoice');
+        for (const invoice of invoices) {
+            await fetchFile(invoice, outputpath);
+        }
 
         if (data.next) {
             await fs.writeFile(lastPageFilePath, JSON.stringify({ next: data.next }));
