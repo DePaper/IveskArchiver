@@ -96,6 +96,7 @@ async function main() {
             throw new Error(`Error fetching page: ${data.message}`);
         }
 
+        // Not running this in parallel because there might be race conditions with mkdir. Running sequentially avoids that and it stil works pretty fast.
         const invoices = data.documents.filter(doc => doc.doctype === 'invoice');
         for (const invoice of invoices) {
             await fetchFile(invoice, outputpath);
