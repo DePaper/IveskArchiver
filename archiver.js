@@ -1,6 +1,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+const API_URL = 'https://app.ivesk.lt/api/pub/digitized';
+
 /**
  * @param {object} document 
  * @returns {string[]}
@@ -102,7 +104,7 @@ async function main() {
         headers: { 'x-api-key': apikey },
     };
 
-    const url = new URL('https://stagingapp.ivesk.lt/api/pub/digitized');
+    const url = new URL(API_URL);
     if (lastPageFile?.next) { url.searchParams.append('from', lastPageFile.next); }
 
     let data = null;
