@@ -1,12 +1,67 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-async function fetchFile(url, outputPath) {
-    const resp = await fetch(url, { method: 'GET' });
-    const file = Buffer.from(await resp.arrayBuffer());
-    return fs.writeFile(outputPath, file);
+/**
+ * @param {object} document 
+ * @returns {string[]}
+ */
+function generateOutputStructure(document) {
+    // Might not work correcly if both companies are favorite.
+    const myname = document.sellerisfavorite ? document.sellernameascii : document.buyernameascii; 
+    const othername = document.sellerisfavorite ? document.buyernameascii : document.sellernameascii;
+    const operation = document.sellerisfavorite ? 'Pardavimai' : 'Pirkimai';
+
+    return [
+        'Ivesk.lt',
+        myname,
+        document.date.substring(0, 7),
+        operation,
+        `${document.date} ${document.docnum.replace(/\s/g, '').replace(/[<>:"?/\\|*]/g, '_')} ${othername} ${document.id}.pdf`,
+    ];
 }
 
+/**
+ * 
+ * @param {string[]} structure 
+ * @param {Buffer} file 
+ * @returns {Promise<void>}
+ */
+async function saveFileWithStructure(structure, file) {
+    let nextPath = '';
+    for (let i = 0; i < structure.length - 1; ++i) {
+        nextPath = path.join(nextPath, structure[i]);
+        try {
+            const stat = await fs.stat(nextPath);
+            if (!stat.isDirectory()) {
+                throw new Error(`${nextPath} exists, but is not a directory.`);
+            }
+        } catch {
+            // Folder does not exist. We need to create it.
+            await fs.mkdir(nextPath);
+        }
+    }
+
+    return fs.writeFile(path.join(...structure), file);
+}
+
+/**
+ * 
+ * @param {object} document 
+ * @param {string} outputPath 
+ * @returns {Promise<void>}
+ */
+async function fetchFile(document, outputPath) {
+    const resp = await fetch(document.url, { method: 'GET' });
+    const file = Buffer.from(await resp.arrayBuffer());
+
+    const structure = generateOutputStructure(document);
+    return saveFileWithStructure([outputPath, ...structure], file);
+}
+
+/**
+ * @param {string} filename 
+ * @returns {object | null}
+ */
 async function getLastPageFile(filename) {
     try {
         const result = await fs.readFile(filename, 'utf-8');
@@ -38,7 +93,8 @@ async function main() {
     }
 
     const lastPageFileName = `${apikey.substring(0, 36)}.json`;
-    const lastPageFilePath = path.join(outputpath, lastPageFileName);
+    // Save the "next" page marker in the same output folder where the files will be saved.
+    const lastPageFilePath = path.join(outputpath, 'Ivesk.lt', lastPageFileName); 
     const lastPageFile = await getLastPageFile(lastPageFilePath);
 
     const options = {
@@ -57,7 +113,9 @@ async function main() {
         const resp = await fetch(url, options);
         data = await resp.json();
 
-        const promises = data.documents.map(doc => fetchFile(doc.url, path.join(outputpath, doc.id)));
+        const promises = data.documents
+            .filter(doc => doc.doctype === 'invoice')
+            .map(doc => fetchFile(doc, outputpath));
         await Promise.all(promises);
 
         if (data.next) {
