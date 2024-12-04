@@ -1,7 +1,7 @@
 # IveskArchiver
-This script will download .pdf files of all digitized invoices of your companies that are marked as favorite. It will store them in the folder you provide as `outputpath`.
-The following is the tree of folders the files will be placed in: `<outputpath>/Ivesk.lt/<myname>/YYYY-MM/<operation>/<filename>.pdf`.
-* `myname` - company name that accountant is working with (a favorite company).
+This script downloads Įvesk archive PDF files for your favorite companies and saves them in the folder specified as `outputpath`.
+The following is the tree of folders the files will be placed in: `<outputpath>/Ivesk.lt/<company>/YYYY-MM/<operation>/<filename>.pdf`.
+* `company` - company name that accountant is working with (a favorite company).
 * `YYYY-MM` - year and month taken from document's date.
 * `operation` - `Pirkimai` or `Pardavimai`.
 * `filename` - combination of document date, document number, client name and document id.
@@ -16,10 +16,11 @@ In case of failure, the script will not lose progress and resume where it left o
 * Ivesk.lt API key. You can generate it here: [https://app.ivesk.lt/settings/general](https://app.ivesk.lt/settings/general).
 
 ## Usage
-Using node:
-`node archiver.js <apikey> <outputpath>`  
-Using npx:
+Using npx (without installation):
 `npx github:DePaper/IveskArchiver <apikey> <outputpath>`
+
+Using as node script:
+`node archiver.js <apikey> <outputpath>`  
 
 * `apikey` - API key to Ivesk.lt
 * `outputpath` - folder where the files should be downloaded
