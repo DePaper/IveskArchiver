@@ -7,13 +7,14 @@ const API_URL = 'https://app.ivesk.lt/api/pub/digitized';
  * @param {object} document 
  * @returns {string[]}
  */
-function generateOutputStructure(document) {
+function generateOutputStructure(document, outputpath) {
     // Might not work correcly if both companies are favorite.
     const myname = document.sellerisfavorite ? document.sellernameascii : document.buyernameascii; 
     const othername = document.sellerisfavorite ? document.buyernameascii : document.sellernameascii;
     const operation = document.sellerisfavorite ? 'Pardavimai' : 'Pirkimai';
 
     return [
+        outputpath,
         'Ivesk.lt',
         myname,
         document.date.substring(0, 7),
@@ -32,7 +33,7 @@ async function fetchFile(document, outputPath) {
     const resp = await fetch(document.url, { method: 'GET' });
     const file = Buffer.from(await resp.arrayBuffer());
 
-    const structure = generateOutputStructure(document);
+    const structure = generateOutputStructure(document, outputPath);
 
     console.log(`Saving ${path.join(...structure)}`);
     const folders = path.join(...structure.slice(0, structure.length - 1));
