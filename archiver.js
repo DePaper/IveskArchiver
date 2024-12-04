@@ -110,10 +110,14 @@ async function main() {
     let data = null;
     let page = 1;
     do {
-        console.log(`Page: `, page);
-
         const resp = await fetch(url, options);
         data = await resp.json();
+
+        console.log(`Got ${data.documents.length} documents`);
+
+        if (!resp.ok) {
+            throw new Error(`Error fetching page: ${data.message}`);
+        }
 
         const promises = data.documents
             .filter(doc => doc.doctype === 'invoice')
@@ -124,8 +128,7 @@ async function main() {
             await fs.writeFile(lastPageFilePath, JSON.stringify({ next: data.next }));
         }
 
-        ++page;
-        url.searchParams.append('from', data.next);
+        url.searchParams.set('from', data.next);
     } while (data.next);
 }
 
