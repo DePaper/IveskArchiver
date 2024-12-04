@@ -1,0 +1,11 @@
+{
+  "name": "iveskarchiver",
+  "version": "1.0.0",
+  "description": "This script will download .pdf files of all digitized invoices of your companies that are marked as favorite.",
+  "main": "archiver.js",
+  "author": "DePaper",
+  "license": "MIT",
+  "bin": {
+    "archiver": "./archiver.js"
+  }
+}
