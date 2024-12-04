@@ -28,7 +28,7 @@ function generateOutputStructure(document, outputpath) {
         result.push(generatePath(outputpath, 'Pirkimai', document.buyernameascii, document.sellernameascii, document.date, document.docnum, document.id));
     }
 
-    return ;
+    return result;
 }
 
 /**
