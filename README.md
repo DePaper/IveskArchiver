@@ -3,7 +3,7 @@ This script downloads Įvesk archive PDF files for your favorite companies and s
 
 The following is the tree of folders the files will be placed in: 
 ```
-<outputpath>/<company>/YYYY-MM/<Pirkima|Pardavimai>/<document date> <document number> <client name>.pdf
+<outputpath>/<company>/YYYY-MM/<Pirkimai|Pardavimai>/<document date> <document number> <client name>.pdf
 ```
 
 * `company` - company name that accountant is working on (a favorite marked company in Ivesk.lt).
